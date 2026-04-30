@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tourism Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: linear-gradient(135deg, #2c3e50, #3498db); color: white; padding: 20px; }
+        .stat-card { background: white; color: #2c3e50; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
+        .tourist-card { background: rgba(255,255,255,0.1); padding: 15px; margin-bottom: 10px; border-radius: 10px; }
+        .stat-value { font-size: 2rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-umbrella-beach"></i> Tourism Department</h2>
+        
+        <div class="row">
+            <div class="col-md-4"><div class="stat-card"><h3 id="tourists">0</h3><small>Active Tourists</small></div></div>
+            <div class="col-md-4"><div class="stat-card"><h3 id="safety">98%</h3><small>Safety Score</small></div></div>
+            <div class="col-md-4"><div class="stat-card"><h3 id="alerts">0</h3><small>Alerts</small></div></div>
+        </div>
+        
+        <div class="card bg-dark">
+            <div class="card-header"><h4><i class="fas fa-list"></i> Active Tourists</h4></div>
+            <div class="card-body" id="touristList">Loading...</div>
+        </div>
+        
+        <div class="card bg-dark mt-3">
+            <div class="card-header bg-info"><h4><i class="fas fa-lightbulb"></i> Safety Tips</h4></div>
+            <div class="card-body" id="tips">Loading...</div>
+        </div>
+    </div>
+    
+    <script>
+        const socket = io();
+        
+        async function loadTourists() {
+            const res = await fetch('/api/dashboard/tourists');
+            const tourists = await res.json();
+            const container = document.getElementById('touristList');
+            if(tourists.length === 0) { container.innerHTML = '<div class="text-muted">No active tourists</div>'; return; }
+            container.innerHTML = tourists.map(t => `
+                <div class="tourist-card">
+                    <strong>${t.name}</strong> <span class="badge bg-success">${t.status}</span><br>
+                    ID: ${t.id}<br>
+                    Blockchain: ${t.blockchain_id}<br>
+                    <button class="btn btn-sm btn-info mt-2" onclick="sendTip('${t.id}')">Send Safety Tip</button>
+                </div>
+            `).join('');
+        }
+        
+        async function loadStats() {
+            const res = await fetch('/api/dashboard/stats');
+            const stats = await res.json();
+            document.getElementById('tourists').innerHTML = stats.active_tourists;
+            document.getElementById('alerts').innerHTML = stats.active_incidents;
+            document.getElementById('safety').innerHTML = Math.max(0, 100 - stats.active_incidents * 2) + '%';
+        }
+        
+        async function loadTips() {
+            const res = await fetch('/api/safety-tips');
+            const data = await res.json();
+            document.getElementById('tips').innerHTML = `<ul>${data.tips.map(t => `<li><i class="fas fa-check-circle text-success"></i> ${t}</li>`).join('')}</ul>`;
+        }
+        
+        function sendTip(id) { alert(`Safety tip sent to Tourist ${id}`); }
+        
+        socket.on('connect', () => console.log('Connected'));
+        socket.on('biometric_update', () => loadTourists());
+        socket.on('new_incident', () => loadStats());
+        
+        loadTourists(); loadStats(); loadTips();
+        setInterval(loadTourists, 10000); setInterval(loadStats, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Tourist ID - SentinX</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0B1120;
+            --bg-secondary: #161C2D;
+            --bg-card: #1A2133;
+            --accent-blue: #3B82F6;
+            --success-green: #10B981;
+            --text-primary: #FFFFFF;
+            --text-secondary: #94A3B8;
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+        
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .navbar {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .id-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+        
+        .id-header {
+            background: linear-gradient(135deg, #1e2a3a, #0f172a);
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .id-header h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.3rem;
+            margin-top: 10px;
+        }
+        
+        .id-badge {
+            background: var(--accent-blue);
+            color: white;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .id-body {
+            padding: 30px;
+        }
+        
+        .qr-code {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .qr-code canvas,
+        .qr-code img {
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .scan-instruction {
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: rgba(59, 130, 246, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        .info-value {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-blue);
+        }
+        
+        .blockchain-badge {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 0.75rem;
+            margin-top: 20px;
+        }
+        
+        .btn-verify {
+            background: var(--accent-blue);
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .btn-secondary-custom {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn-verify:hover, .btn-secondary-custom:hover {
+            transform: translateY(-2px);
+            transition: all 0.3s;
+        }
+        
+        .registration-form {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .form-control {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            color: var(--text-primary);
+        }
+        
+        .form-control:focus {
+            border-color: var(--accent-blue);
+            box-shadow: none;
+        }
+        
+        .btn-gradient {
+            background: var(--accent-blue);
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            width: 100%;
+        }
+        
+        .btn-gradient:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            transition: all 0.3s;
+        }
+        
+        .alert-custom {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success-green);
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+        
+        .download-btn {
+            background: transparent;
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+        
+        .download-btn:hover {
+            background: var(--accent-blue);
+            color: white;
+        }
+        
+        .ip-info {
+            background: rgba(0,0,0,0.5);
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        
+        .ip-info code {
+            background: #000;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: #10B981;
+            font-size: 0.75rem;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <div class="navbar d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-shield-alt me-2" style="color: var(--accent-blue);"></i>
+                <strong style="font-family: 'JetBrains Mono', monospace;">SENTINX</strong>
+                <span class="ms-2 text-secondary">Digital ID Portal</span>
+            </div>
+            <div>
+                <a href="/" class="btn btn-sm btn-outline-light me-2">Home</a>
+                <a href="/dashboard/police" class="btn btn-sm btn-outline-light me-2">Police</a>
+                <a href="/dashboard/tourism" class="btn btn-sm btn-outline-light">Tourism</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <!-- Digital ID Card Display -->
+                <div class="id-card" id="idCard" style="display: none;">
+                    <div class="id-header">
+                        <i class="fas fa-microchip fa-2x" style="color: var(--accent-blue);"></i>
+                        <h2>DIGITAL TOURIST ID</h2>
+                        <div class="id-badge">
+                            <i class="fas fa-check-circle"></i> BLOCKCHAIN VERIFIED
+                        </div>
+                    </div>
+                    <div class="id-body">
+                        <div class="qr-code">
+                            <div id="qrcode"></div>
+                            <div class="scan-instruction">
+                                <i class="fas fa-qrcode me-1"></i> 
+                                SCAN WITH YOUR PHONE CAMERA
+                            </div>
+                            <button class="download-btn" onclick="downloadQR()">
+                                <i class="fas fa-download"></i> Download QR Code
+                            </button>
+                            <div class="ip-info">
+                                <i class="fas fa-globe"></i> 
+                                <strong>Server URL:</strong><br>
+                                <code id="serverUrl">Detecting...</code>
+                                <br><small class="text-secondary">Scan QR code or use this URL on your phone</small>
+                            </div>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label"><i class="fas fa-id-card"></i> Digital ID:</span>
+                            <span class="info-value" id="displayId">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label"><i class="fas fa-user"></i> Full Name:</span>
+                            <span class="info-value" id="displayName">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label"><i class="fas fa-passport"></i> Passport:</span>
+                            <span class="info-value" id="displayPassport">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label"><i class="fas fa-phone"></i> Phone:</span>
+                            <span class="info-value" id="displayPhone">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label"><i class="fas fa-calendar"></i> Issued:</span>
+                            <span class="info-value" id="displayDate">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label"><i class="fas fa-link"></i> Block Hash:</span>
+                            <span class="info-value" id="displayHash">-</span>
+                        </div>
+                        
+                        <div class="blockchain-badge">
+                            <i class="fas fa-link me-1"></i> SHA-256 Protected | Immutable Blockchain Record
+                        </div>
+                        
+                        <button class="btn-verify" onclick="verifyID()">
+                            <i class="fas fa-shield-alt"></i> Verify ID Authenticity
+                        </button>
+                        
+                        <button class="btn-secondary-custom" onclick="showRegistration()">
+                            <i class="fas fa-plus"></i> Register New ID
+                        </button>
+                        
+                        <div id="verifyResult" class="mt-3"></div>
+                    </div>
+                </div>
+                
+                <!-- Registration Form -->
+                <div class="registration-form" id="registrationForm">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-id-card fa-2x" style="color: var(--accent-blue);"></i>
+                        <h3 class="mt-2">REGISTER DIGITAL ID</h3>
+                        <p class="text-secondary small">Your ID will be stored on blockchain with SHA-256 encryption</p>
+                    </div>
+                    
+                    <input type="text" id="regName" class="form-control mb-3" placeholder="Full Name">
+                    <input type="text" id="regPassport" class="form-control mb-3" placeholder="Passport Number">
+                    <input type="tel" id="regPhone" class="form-control mb-3" placeholder="Phone Number">
+                    <input type="email" id="regEmail" class="form-control mb-3" placeholder="Email Address">
+                    
+                    <button onclick="generateID()" class="btn-gradient" id="generateBtn">
+                        <i class="fas fa-microchip"></i> Generate Blockchain ID
+                    </button>
+                    
+                    <div class="ip-info mt-3">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Auto-detected Server:</strong><br>
+                        <code id="detectedIp">Detecting...</code>
+                        <br><small>QR code will automatically use this IP address</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <!-- Information Panel -->
+                <div class="id-card">
+                    <div class="id-header">
+                        <i class="fas fa-info-circle fa-2x" style="color: var(--accent-blue);"></i>
+                        <h2>ABOUT DIGITAL TOURIST ID</h2>
+                    </div>
+                    <div class="id-body">
+                        <h5><i class="fas fa-question-circle"></i> What is it?</h5>
+                        <p class="text-secondary">A blockchain-based digital identity that provides unforgeable, instantly verifiable identification for tourists worldwide.</p>
+                        
+                        <hr style="background: var(--border-color);">
+                        
+                        <h5><i class="fas fa-qrcode"></i> How to Scan with Phone</h5>
+                        <div class="alert-custom">
+                            <i class="fas fa-mobile-alt me-2"></i>
+                            <strong>To demonstrate to your teacher:</strong><br>
+                            1. After generating your ID, you'll see a QR code<br>
+                            2. Open your phone's camera app<br>
+                            3. Point it at the QR code on your computer screen<br>
+                            4. Tap the notification that appears<br>
+                            5. You'll see the verification page with all details!<br><br>
+                            <strong>Note:</strong> Your phone must be on the SAME WiFi as your computer.
+                        </div>
+                        
+                        <hr style="background: var(--border-color);">
+                        
+                        <h5><i class="fas fa-cogs"></i> How It Works</h5>
+                        <div class="row mt-3">
+                            <div class="col-12 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 35px; height: 35px; background: var(--accent-blue);">1</div>
+                                    <div><strong>Register</strong><br><small class="text-secondary">Submit your details</small></div>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 35px; height: 35px; background: var(--accent-blue);">2</div>
+                                    <div><strong>Blockchain Storage</strong><br><small class="text-secondary">SHA-256 encrypted storage</small></div>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 35px; height: 35px; background: var(--accent-blue);">3</div>
+                                    <div><strong>QR Code Generated</strong><br><small class="text-secondary">Scan with any phone camera</small></div>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 35px; height: 35px; background: var(--accent-blue);">4</div>
+                                    <div><strong>Instant Verification</strong><br><small class="text-secondary">Authorities can verify instantly</small></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr style="background: var(--border-color);">
+                        
+                        <h5><i class="fas fa-shield-alt"></i> Security Features</h5>
+                        <div class="row g-2 mt-2">
+                            <div class="col-6">
+                                <div class="border rounded p-2 text-center" style="border-color: var(--border-color);">
+                                    <i class="fas fa-lock text-success"></i><br>
+                                    <small>SHA-256</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-2 text-center" style="border-color: var(--border-color);">
+                                    <i class="fas fa-link text-success"></i><br>
+                                    <small>Blockchain</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-2 text-center" style="border-color: var(--border-color);">
+                                    <i class="fas fa-fingerprint text-success"></i><br>
+                                    <small>Tamper-Proof</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-2 text-center" style="border-color: var(--border-color);">
+                                    <i class="fas fa-history text-success"></i><br>
+                                    <small>Immutable</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentID = null;
+        let currentQR = null;
+        let COMPUTER_IP = '';
+        let BASE_URL = '';
+        
+        // Auto-detect IP address from server
+        async function getServerIP() {
+            try {
+                const response = await fetch('/api/get-ip');
+                const data = await response.json();
+                if (data.success && data.ip && data.ip !== 'localhost') {
+                    COMPUTER_IP = data.ip;
+                    BASE_URL = `http://${COMPUTER_IP}:5000`;
+                    document.getElementById('serverUrl').innerHTML = BASE_URL;
+                    document.getElementById('detectedIp').innerHTML = BASE_URL;
+                    console.log('✅ Server IP detected:', COMPUTER_IP);
+                } else {
+                    // Fallback to localhost
+                    COMPUTER_IP = 'localhost';
+                    BASE_URL = 'http://localhost:5000';
+                    document.getElementById('serverUrl').innerHTML = BASE_URL;
+                    document.getElementById('detectedIp').innerHTML = BASE_URL;
+                    console.log('⚠️ Using localhost fallback');
+                }
+            } catch (error) {
+                console.error('❌ Could not detect IP:', error);
+                COMPUTER_IP = 'localhost';
+                BASE_URL = 'http://localhost:5000';
+                document.getElementById('serverUrl').innerHTML = BASE_URL;
+                document.getElementById('detectedIp').innerHTML = BASE_URL;
+            }
+        }
+        
+        async function generateID() {
+            const name = document.getElementById('regName').value;
+            const passport = document.getElementById('regPassport').value;
+            const phone = document.getElementById('regPhone').value;
+            const email = document.getElementById('regEmail').value;
+            const btn = document.getElementById('generateBtn');
+            
+            if (!name || !passport) {
+                alert('Please enter Name and Passport Number');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name, passport, phone, email})
+                });
+                
+                const data = await response.json();
+                currentID = data.digital_id;
+                
+                // Use detected IP for QR code - THIS IS THE KEY FIX!
+                const verifyURL = `${BASE_URL}/verify/${currentID}`;
+                
+                console.log('🔗 QR Code URL:', verifyURL);
+                
+                // Clear previous QR code
+                document.getElementById('qrcode').innerHTML = '';
+                
+                // Generate real QR code
+                new QRCode(document.getElementById('qrcode'), {
+                    text: verifyURL,
+                    width: 180,
+                    height: 180,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                
+                currentQR = verifyURL;
+                
+                document.getElementById('displayId').innerText = currentID;
+                document.getElementById('displayName').innerText = name;
+                document.getElementById('displayPassport').innerText = '****' + passport.slice(-4);
+                document.getElementById('displayPhone').innerText = phone || 'Not provided';
+                document.getElementById('displayDate').innerText = new Date().toLocaleString();
+                document.getElementById('displayHash').innerText = generateMockHash();
+                
+                document.getElementById('registrationForm').style.display = 'none';
+                document.getElementById('idCard').style.display = 'block';
+                
+                showNotification('Digital ID Generated Successfully! Scan QR code with your phone!', 'success');
+            } catch(error) {
+                alert('Error: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-microchip"></i> Generate Blockchain ID';
+            }
+        }
+        
+        function generateMockHash() {
+            let hash = '';
+            const chars = '0123456789abcdef';
+            for (let i = 0; i < 16; i++) {
+                hash += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return hash;
+        }
+        
+        function verifyID() {
+            if(!currentID) {
+                document.getElementById('verifyResult').innerHTML = '<div class="alert alert-warning">No ID to verify</div>';
+                return;
+            }
+            document.getElementById('verifyResult').innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> 
+                    <strong>ID VERIFIED!</strong><br>
+                    Digital ID: ${currentID}<br>
+                    Blockchain record confirmed on SentinX network.<br>
+                    <small>Timestamp: ${new Date().toLocaleString()}</small>
+                </div>`;
+            setTimeout(() => {
+                document.getElementById('verifyResult').innerHTML = '';
+            }, 5000);
+        }
+        
+        function downloadQR() {
+            if (!currentQR) return;
+            
+            const qrcodeDiv = document.getElementById('qrcode');
+            const canvas = qrcodeDiv.querySelector('canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = `sentinx_id_${currentID}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+                showNotification('QR Code downloaded!', 'success');
+            }
+        }
+        
+        function showRegistration() {
+            document.getElementById('registrationForm').style.display = 'block';
+            document.getElementById('idCard').style.display = 'none';
+            currentID = null;
+            currentQR = null;
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
+            notification.style.zIndex = '9999';
+            notification.style.background = type === 'success' ? '#10B981' : '#3B82F6';
+            notification.style.color = 'white';
+            notification.style.borderRadius = '12px';
+            notification.style.padding = '15px 20px';
+            notification.innerHTML = message + '<button class="btn-close btn-close-white ms-3" onclick="this.parentElement.remove()"></button>';
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
+        }
+        
+        // Initialize - detect IP on page load
+        getServerIP();
+    </script>
+</body>
+</html>
